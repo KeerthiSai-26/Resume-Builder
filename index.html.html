@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Premium Resume Builder</title>
+
+<!-- PDF Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
+<style>
+:root {
+  --primary: #2563eb;
+  --secondary: #1e3a8a;
+}
+
+body {
+  font-family: 'Calibri', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #eef2ff, #dbeafe);
+  margin: 0;
+  color: #1e293b;
+}
+
+h1 {
+  text-align: center;
+  background: var(--primary);
+  color: white;
+  padding: 15px 0;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.form {
+  width: 45%;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.form input,
+.form textarea {
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1.5px solid #dbeafe;
+  border-radius: 8px;
+}
+
+.form input:focus,
+.form textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.5);
+}
+
+button {
+  background: var(--primary);
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.resume {
+  width: 55%;
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.left {
+  width: 35%;
+  background: #e0e7ff;
+  color: var(--secondary);
+  padding: 25px;
+  text-align: center;
+  border-right: 4px solid var(--primary);
+}
+
+.left img {
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  margin-bottom: 15px;
+  display: none;
+}
+
+.left h3 {
+  border-bottom: 2px solid var(--primary);
+}
+
+.right {
+  width: 65%;
+  padding: 25px;
+}
+
+.right h3 {
+  border-bottom: 3px solid var(--primary);
+  color: var(--secondary);
+}
+
+#skills-container div {
+  margin-bottom: 10px;
+  text-align: left;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🧾 Premium Resume Builder</h1>
+
+<div class="container">
+
+<!-- FORM -->
+<div class="form">
+<input type="text" id="name" placeholder="Full Name">
+<input type="email" id="email" placeholder="Email">
+<input type="text" id="phone" placeholder="Phone">
+<input type="file" id="photo" accept="image/*">
+
+<textarea id="summary" placeholder="Professional Summary"></textarea>
+<textarea id="education" placeholder="Education"></textarea>
+<textarea id="experience" placeholder="Experience"></textarea>
+<textarea id="projects" placeholder="Projects"></textarea>
+<textarea id="skills" placeholder="Skills (comma separated)"></textarea>
+
+<button onclick="generateResume()">Generate</button>
+<button onclick="downloadResume()">Download PDF</button>
+<button onclick="clearForm()">Clear</button>
+</div>
+
+<!-- RESUME -->
+<div class="resume" id="resume">
+
+<div class="left">
+<img id="r-photo">
+<h2 id="r-name"></h2>
+<p id="r-email"></p>
+<p id="r-phone"></p>
+
+<h3>Skills</h3>
+<div id="skills-container"></div>
+</div>
+
+<div class="right">
+<h3>Summary</h3>
+<p id="r-summary"></p>
+
+<h3>Education</h3>
+<p id="r-education"></p>
+
+<h3>Experience</h3>
+<p id="r-experience"></p>
+
+<h3>Projects</h3>
+<p id="r-projects"></p>
+</div>
+
+</div>
+</div>
+
+<script>
+
+function generateResume() {
+
+  let name = document.getElementById("name").value;
+
+  if(name.trim() === ""){
+    alert("Please enter your name");
+    return;
+  }
+
+  document.getElementById("r-name").innerText = name;
+  document.getElementById("r-email").innerText = document.getElementById("email").value;
+  document.getElementById("r-phone").innerText = document.getElementById("phone").value;
+  document.getElementById("r-summary").innerText = document.getElementById("summary").value;
+  document.getElementById("r-education").innerText = document.getElementById("education").value;
+  document.getElementById("r-experience").innerText = document.getElementById("experience").value;
+  document.getElementById("r-projects").innerText = document.getElementById("projects").value;
+
+  // Skills
+  let skills = document.getElementById("skills").value.split(",");
+  let skillsHTML = "";
+
+  skills.forEach(skill => {
+    skill = skill.trim();
+    if(skill){
+      let level = Math.floor(Math.random() * 40) + 60;
+
+      skillsHTML += `
+      <div>
+        <p>${skill}</p>
+        <div style="background:#c7d2fe;height:6px;border-radius:3px;">
+          <div style="width:${level}%;background:#2563eb;height:6px;border-radius:3px;"></div>
+        </div>
+      </div>`;
+    }
+  });
+
+  document.getElementById("skills-container").innerHTML = skillsHTML;
+}
+
+// Photo Preview
+document.getElementById("photo").addEventListener("change", function () {
+  const reader = new FileReader();
+  reader.onload = function () {
+    let photo = document.getElementById("r-photo");
+    photo.src = reader.result;
+    photo.style.display = "block";
+  };
+  if(this.files[0]){
+    reader.readAsDataURL(this.files[0]);
+  }
+});
+
+// Download PDF
+function downloadResume() {
+  const element = document.getElementById("resume");
+
+  const opt = {
+    margin: 0,
+    filename: "My_Resume.pdf",
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+  };
+
+  html2pdf().set(opt).from(element).save();
+}
+
+// Clear Form
+function clearForm(){
+  document.querySelectorAll("input, textarea").forEach(el => el.value="");
+  document.getElementById("skills-container").innerHTML = "";
+}
+
+</script>
+
+</body>
+</html>
